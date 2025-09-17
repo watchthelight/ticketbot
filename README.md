@@ -1,55 +1,89 @@
 sentinel-bot
-===========
+============
 
-Production-ready Discord bot scaffold in TypeScript with discord.js, Fastify, and Prisma. Ships with slash command framework, rate limiting, logging, Docker, and CI.
+What this is
+I built a Discord bot skeleton that’s ready to ship. It’s TypeScript, discord.js v14, Prisma, and Fastify. It registers slash commands, persists to SQLite/Postgres, and runs clean in Docker and CI.
+
+Features
+- Slash commands with permissions and typed handlers
+- Prisma ORM (SQLite dev, Postgres prod)
+- Fastify HTTP server (/readyz, /livez, seam for /license/check)
+- Token bucket rate limiting + cooldowns
+- Structured logs with request/interaction IDs
+- Docker + GitHub Actions
 
 Quickstart
--
-- Requirements: Node 20, npm (or pnpm/yarn), SQLite (file based), Git
-- Copy env: `cp .env.sample .env`, fill DISCORD_*
-- Install deps: `npm i`
-- Generate Prisma client (SQLite dev schema): `npm run prisma:generate`
-- Start dev: `npm run dev`
+Prerequisites
+- Node 20, npm, Git
 
-Deploy Commands
--
-- Update slash commands with: `npm run deploy:commands`
+Clone + install
+```
+git clone https://github.com/watchthelight/ticketbot.git
+cd ticketbot
+npm ci
+```
 
-Docker Compose
--
-- `docker-compose up --build`
-- App listens on `http://localhost:3000/readyz` when healthy
-- Uses Postgres for `DATABASE_URL` and sets `PRISMA_SCHEMA=prisma/schema.postgres.prisma`
+Env
+```
+cp .env.sample .env
+# Fill DISCORD_* and set DATABASE_URL (SQLite default is fine for dev)
+```
 
-Security & Ops
--
-- No secrets in code; uses env vars
-- Minimal intents, structured logging, correlation IDs
-- Token bucket rate limiter and simple cooldowns
-- Input validation via zod in env; command options validated by discord
-- Graceful shutdown on SIGINT/SIGTERM
+Run dev
+```
+npm run prisma:generate
+npm run dev
+```
 
-Architecture
--
-- Discord client: `src/discord/client.ts`
-- Commands registered via `src/discord/deployCommands.ts`
-- HTTP server (health + future license check): `src/http/server.ts`
-- Prisma client: `src/lib/db.ts`, schema in `prisma/`
-- Key helpers: `src/lib/keys.ts`
-- Rate limit: `src/lib/rateLimit.ts`
+First success signal
+- Bot logs “Discord client ready” and HTTP responds at http://localhost:3000/readyz with `{ ok: true }`.
 
-Dev vs Prod DB
--
-- Dev default: SQLite via `prisma/schema.prisma` and `DATABASE_URL="file:./dev.db"`
-- Prod: Postgres via `prisma/schema.postgres.prisma` and `DATABASE_URL` postgres URL
-- Control Prisma schema with `PRISMA_SCHEMA` env; scripts use `scripts/prisma-ctl.mjs`
+Commands & Usage
+- `/help` — shows commands you can use.
+- `/health` — ping, DB check.
+- `/getkey` — claim a one-time key. If already claimed, I show a masked fingerprint.
+- `/license issue <user> [expires_in_days] [rotate]` — admin only. Idempotent unless `rotate`.
+- `/license rotate <user>` — admin only.
+- `/license revoke <user> [reason]` — admin only.
+- `/license info <user>` — admin only.
+- `/config set-admin-role <role_id>` — set per-guild admin role override.
 
-Testing
--
-- `npm test` runs vitest unit tests (no DB required; Prisma is mocked)
+Example error
+```
+/license rotate @user
+→ "Admin only"
+```
 
-Future License Server Integration
--
-- Add HTTP endpoint implementation at `src/http/server.ts: /license/check` to verify presented keys
-- Use `keys.verifyKey` against stored hashes and update audit logs
+Config
+VAR | Required | Example | Notes
+--- | --- | --- | ---
+DISCORD_TOKEN | yes | xoxb… | Bot token
+DISCORD_APP_ID | yes | 123456 | Application ID
+DISCORD_PUBLIC_KEY | yes | abc… | For future signature checks
+DATABASE_URL | yes | file:./dev.db | SQLite for dev; Postgres URL in prod
+ADMIN_IDS | no | 123,456 | Comma-separated user IDs with admin access
 
+Dev notes
+- Scripts: `dev`, `build`, `start`, `lint`, `test`, `format`, `deploy:commands`.
+- `prisma:generate` respects `PRISMA_SCHEMA` (defaults to SQLite). Use `prisma/schema.postgres.prisma` for Postgres.
+- Tests mock Prisma; no DB needed.
+- I keep code self-explanatory. Minimal comments. Short errors.
+
+Deploy
+- Docker Compose: `docker-compose up --build`
+- Health: GET `http://localhost:3000/readyz` (200 JSON `{ ok: true }`)
+
+Security notes
+- No hardcoded secrets. Env only.
+- Least-privileged Discord intents.
+- Rotate tokens and keys regularly.
+
+Roadmap
+- Implement `/license/check` verification
+- Redis-backed rate limiter
+- Sharding for large guild counts
+- Per-command metrics and SLOs
+- Admin UX improvements
+
+License
+MIT

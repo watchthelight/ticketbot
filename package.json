@@ -14,6 +14,7 @@
     "prisma:migrate": "node scripts/prisma-ctl.mjs migrate deploy",
     "test": "vitest run",
     "lint": "eslint .",
+    "format": "prettier -w .",
     "deploy:commands": "tsx src/discord/deployCommands.ts"
   },
   "dependencies": {

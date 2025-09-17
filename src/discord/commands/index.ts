@@ -14,4 +14,3 @@ export const commands: CommandModule[] = [
 ];
 
 export default commands;
-

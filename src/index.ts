@@ -33,6 +33,11 @@ async function main() {
     durationMs: Number(env.RATE_LIMIT_DURATION_SEC) * 1000,
   });
 
+  const checkRateLimit = (name: string, userId: string) => {
+    const key = `cmd:${name}:${userId}`;
+    return defaultLimiter.consume(key, 1);
+  };
+
   client.on(Events.InteractionCreate, async (interaction) => {
     if (interaction.type !== InteractionType.ApplicationCommand) return;
     if (!interaction.isChatInputCommand()) return;
@@ -43,8 +48,7 @@ async function main() {
     if (!cmd) return;
     try {
       // default per-user-per-command rate limit
-      const key = `cmd:${interaction.commandName}:${interaction.user.id}`;
-      const res = defaultLimiter.consume(key, 1);
+      const res = checkRateLimit(interaction.commandName, interaction.user.id);
       if (!res.ok) {
         const sec = Math.ceil((res.retryAfterMs ?? 1000) / 1000);
         await interaction.reply({ content: `Slow down. Try again in ~${sec}s.`, ephemeral: true });

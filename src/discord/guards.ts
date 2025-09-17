@@ -7,14 +7,8 @@ import { getPrisma } from '../lib/db';
 const globalLimiter = new InMemoryRateLimiter({ points: 5, durationMs: 15_000 });
 const cooldowns = new Map<string, number>();
 
-export function isAdminInteraction(interaction: ChatInputCommandInteraction, adminIds: string[]) {
-  if (adminIds.includes(interaction.user.id)) return true;
-  const guildId = interaction.guildId;
-  if (!guildId) return false;
-  const member = interaction.member;
-  const roles = (member?.roles as GuildMemberRoleManager | undefined)?.cache;
-  if (!roles) return false;
-  return false; // role-based override checked via DB below
+function getAdminIds(interaction: ChatInputCommandInteraction): string[] {
+  return (interaction.client as any).config?.ADMIN_IDS ?? [];
 }
 
 export async function hasGuildAdminRole(
@@ -34,8 +28,7 @@ export async function hasGuildAdminRole(
 
 export function requireAdmin(msg = 'Admin only'): (h: CommandHandler) => CommandHandler {
   return (handler: CommandHandler) => async (interaction) => {
-    const adminIds: string[] = (interaction.client as any).config?.ADMIN_IDS ?? [];
-    const ok = await hasGuildAdminRole(interaction, adminIds);
+    const ok = await hasGuildAdminRole(interaction, getAdminIds(interaction));
     if (!ok) throw new PermissionError(msg);
     return handler(interaction);
   };

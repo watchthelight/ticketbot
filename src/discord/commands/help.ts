@@ -9,13 +9,13 @@ export const helpCommand: CommandModule = {
     const { client } = interaction;
     const isAdmin = await hasGuildAdminRole(interaction, (client as any).config.ADMIN_IDS);
 
-    const publicCmds = ['help', 'health', 'getkey'];
-    const adminCmds = ['license', 'config'];
-
+    const list = (xs: string[]) => xs.map((c) => `/${c}`).join(', ');
+    const publicCmds = list(['help', 'health', 'getkey']);
+    const adminCmds = list(['license', 'config']);
     const lines = [
-      `Available commands:`,
-      `- ${publicCmds.map((c) => `/${c}`).join(', ')}`,
-      ...(isAdmin ? [`- ${adminCmds.map((c) => `/${c}`).join(', ')}`] : []),
+      'Available commands:',
+      `- ${publicCmds}`,
+      ...(isAdmin ? [`- ${adminCmds}`] : []),
     ];
 
     await interaction.reply({ content: lines.join('\n'), ephemeral: true });
@@ -23,4 +23,3 @@ export const helpCommand: CommandModule = {
 };
 
 export default helpCommand;
-

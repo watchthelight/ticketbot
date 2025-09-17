@@ -41,4 +41,3 @@ export async function verifyKey(rawKey: string, hash: string): Promise<boolean> 
     return false;
   }
 }
-
