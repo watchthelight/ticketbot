@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: sentinel
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  app:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DISCORD_TOKEN: ${DISCORD_TOKEN}
+      DISCORD_APP_ID: ${DISCORD_APP_ID}
+      DISCORD_PUBLIC_KEY: ${DISCORD_PUBLIC_KEY}
+      ADMIN_IDS: ${ADMIN_IDS}
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/sentinel?schema=public
+      PRISMA_SCHEMA: prisma/schema.postgres.prisma
+    ports:
+      - '3000:3000'
+    restart: unless-stopped
+volumes:
+  db-data:
+

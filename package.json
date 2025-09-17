@@ -1,0 +1,42 @@
+{
+  "name": "sentinel-bot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Production-ready Discord bot scaffold with Prisma, Fastify, and strong typings.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "prisma:generate": "node scripts/prisma-ctl.mjs generate",
+    "prisma:migrate": "node scripts/prisma-ctl.mjs migrate deploy",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "deploy:commands": "tsx src/discord/deployCommands.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.18.0",
+    "argon2": "^0.30.6",
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5",
+    "fastify": "^4.28.1",
+    "pino": "^9.4.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.12",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "pino-pretty": "^11.2.2",
+    "prettier": "^3.3.3",
+    "prisma": "^5.18.0",
+    "tsx": "^4.19.1",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

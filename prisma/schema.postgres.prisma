@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  licenses  License[]
+}
+
+enum LicenseStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+model License {
+  id            String        @id @default(cuid())
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String
+  keyHash       String
+  fingerprint   String
+  status        LicenseStatus @default(ACTIVE)
+  issuedAt      DateTime      @default(now())
+  expiresAt     DateTime?
+  rotatedFrom   License?      @relation("Rotations", fields: [rotatedFromId], references: [id])
+  rotatedFromId String?
+  revokedAt     DateTime?
+  revokedBy     String?
+  revokeReason  String?
+}
+
+model GuildConfig {
+  guildId     String   @id
+  adminRoleId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum AuditAction {
+  ISSUE
+  ROTATE
+  REVOKE
+  INFO
+  CONFIG_SET
+}
+
+model AuditLog {
+  id        String      @id @default(cuid())
+  actorId   String
+  action    AuditAction
+  targetId  String?
+  details   Json
+  createdAt DateTime    @default(now())
+  success   Boolean
+}
+
