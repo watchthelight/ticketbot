@@ -1,8 +1,7 @@
 sentinel-bot
 ============
 
-What this is
-I built a Discord bot skeleton that’s ready to ship. It’s TypeScript, discord.js v14, Prisma, and Fastify. It registers slash commands, persists to SQLite/Postgres, and runs clean in Docker and CI.
+ticketbot for warlock. TypeScript, discord.js v14, Prisma, and Fastify. It registers slash commands, persists to SQLite/Postgres, and runs clean in Docker and CI.
 
 Features
 - Slash commands with permissions and typed handlers
